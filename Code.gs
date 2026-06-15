@@ -1,5 +1,5 @@
 function doGet(e) {
-  var template = HtmlService.createTemplateFromFile('Index');
+  var template = HtmlService.createTemplateFromFile('index');
   return template.evaluate().setSandboxMode(HtmlService.SandboxMode.IFRAME)
   .addMetaTag('viewport','width=device-width,initial-scale=1')
         .setTitle("เช็คเวลาลงทะเบียนเบี้ยยังชีพผู้สูงอายุ");
