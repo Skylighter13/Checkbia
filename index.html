@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เช็คสิทธิ์เบี้ยยังชีพผู้สูงอายุ</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+      :root {
+        --primary-color: #7b1fa2;
+        --primary-light: #ba68c8;
+        --primary-hover: #ab47bc;
+        --bg-color: #f3e5f5;
+        --text-dark: #333333;
+        --text-muted: #888888;
+        --danger-color: #e53935;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Sarabun', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-dark);
+        display: flex;
+        flex-direction: column; /* ปรับให้เรียงจากบนลงล่าง */
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 1.5em;
+      }
+
+      /* กล่องคอนเทนเนอร์หลัก (Card) */
+      .container {
+        background: #ffffff;
+        width: 100%;
+        max-width: 480px;
+        padding: 2.5em 2em;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(123, 31, 162, 0.1);
+        text-align: center;
+      }
+
+      h2 {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        margin-bottom: 0.5em;
+        line-height: 1.4;
+      }
+
+      h3 {
+        color: var(--text-dark);
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-top: 1.5em;
+        margin-bottom: 1em;
+      }
+
+      .note {
+        color: var(--danger-color);
+        font-size: 0.9rem;
+        margin-bottom: 1em;
+      }
+
+      /* จัดรูปแบบฟอร์ม */
+      .input-group {
+        margin-bottom: 1.5em;
+      }
+
+      input[type="date"] {
+        width: 100%;
+        padding: 12px 15px;
+        font-size: 1rem;
+        font-family: 'Sarabun', sans-serif;
+        border-radius: 8px;
+        border: 1px solid #ce93d8;
+        outline: none;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        color: var(--text-dark);
+      }
+
+      input[type="date"]:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(186, 104, 200, 0.2);
+      }
+
+      .date-display {
+        margin-top: 0.8em;
+        font-size: 0.95rem;
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      button {
+        width: 100%;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 14px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        font-family: 'Sarabun', sans-serif;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.1s ease;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover);
+      }
+
+      button:active {
+        transform: scale(0.98);
+      }
+
+      /* กล่องแสดงผลลัพธ์ */
+      .result {
+        margin-top: 2em;
+        padding: 1.2em;
+        background: #f8f0fc;
+        border-left: 6px solid var(--primary-color);
+        border-radius: 8px;
+        text-align: left;
+        font-size: 1rem;
+        line-height: 1.6;
+        animation: fadeIn 0.4s ease;
+      }
+
+      .result strong {
+        color: var(--primary-color);
+      }
+
+      /* แอนิเมชันตอนแสดงผล */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      /* สไตล์สำหรับ Footer */
+      .footer {
+        margin-top: 2em;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="container">
+      <h2>ตรวจสอบสิทธิ์ลงทะเบียน<br>เบี้ยยังชีพผู้สูงอายุ</h2>
+      <!-- ตัด by Pari Pin ออกจากตรงนี้ -->
+      <p class="note">* เป็นการตรวจสอบอายุเท่านั้น</p>
+      
+      <h3>กรุณาเลือกวันเดือนปีเกิดของคุณ</h3>
+      
+      <div class="input-group">
+        <input type="date" id="birthDate">
+        <div id="thaiDateDisplay" class="date-display"></div>
+      </div>
+
+      <button onclick="check()">ตรวจสอบ</button>
+      
+      <div id="output" class="result" style="display:none;"></div>
+    </div>
+
+    <!-- ย้าย By Pari Pin มาไว้ด้านล่างเป็น Footer -->
+    <div class="footer">
+      Powered by <strong>Pari Pin</strong>
+    </div>
+
+    <script>
+      // แสดงวันที่เป็นภาษาไทย
+      document.getElementById("birthDate").addEventListener("change", function () {
+        const inputDate = new Date(this.value);
+        if (!isNaN(inputDate)) {
+          const thaiYear = inputDate.getFullYear() + 543;
+          const monthNames = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+          ];
+          const displayDate = `${inputDate.getDate()} ${monthNames[inputDate.getMonth()]} ${thaiYear}`;
+          document.getElementById("thaiDateDisplay").innerText = `คุณเลือก: ${displayDate}`;
+        } else {
+          document.getElementById("thaiDateDisplay").innerText = "";
+        }
+      });
+
+      // ฟังก์ชันส่งตรวจสอบ
+      function check() {
+        const date = document.getElementById("birthDate").value;
+        if (!date) {
+          alert("กรุณาเลือกวันเกิดก่อนครับ");
+          return;
+        }
+
+        // หากเรียกใช้งานผ่าน Google Apps Script
+        google.script.run.withSuccessHandler(showResult).checkPension(date);
+      }
+
+      // ฟังก์ชันแสดงผลลัพธ์
+      function showResult(response) {
+        const output = document.getElementById("output");
+        output.style.display = "block";
+
+        if (response.status === "error") {
+          output.innerHTML = `⚠️ ${response.message}`;
+        } else if (response.status === "eligible") {
+          output.innerHTML = `✅ อายุ ${response.age} ปี<br>
+          <strong>คุณสามารถลงทะเบียนได้แล้ว</strong><br>
+          จะได้รับเบี้ยยังชีพเดือนละ <strong>${response.allowance} บาท</strong><br><br>
+          📍 สามารถลงทะเบียนได้ที่องค์กรปกครองส่วนท้องถิ่นตามทะเบียนบ้าน<br><br>
+          <strong>เอกสารที่ใช้:</strong><br>
+          1. บัตรประชาชน<br>
+          2. ทะเบียนบ้าน<br>
+          3. สมุดบัญชีธนาคาร`;
+        } else if (response.status === "not_yet") {
+          output.innerHTML = `⏳ อายุ ${response.age} ปี<br>
+          ยังไม่สามารถลงทะเบียนได้<br>
+          สามารถลงทะเบียนได้ตั้งแต่ <strong>${response.eligibleDate}</strong> เป็นต้นไป`;
+        }
+      }
+    </script>
+  </body>
+</html>
