@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
   <head>
-    <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เช็คสิทธิ์เบี้ยยังชีพผู้สูงอายุ</title>
@@ -30,14 +29,13 @@
         background-color: var(--bg-color);
         color: var(--text-dark);
         display: flex;
-        flex-direction: column; /* ปรับให้เรียงจากบนลงล่าง */
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
         padding: 1.5em;
       }
 
-      /* กล่องคอนเทนเนอร์หลัก (Card) */
       .container {
         background: #ffffff;
         width: 100%;
@@ -69,7 +67,6 @@
         margin-bottom: 1em;
       }
 
-      /* จัดรูปแบบฟอร์ม */
       .input-group {
         margin-bottom: 1.5em;
       }
@@ -120,7 +117,6 @@
         transform: scale(0.98);
       }
 
-      /* กล่องแสดงผลลัพธ์ */
       .result {
         margin-top: 2em;
         padding: 1.2em;
@@ -137,13 +133,11 @@
         color: var(--primary-color);
       }
 
-      /* แอนิเมชันตอนแสดงผล */
       @keyframes fadeIn {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
 
-      /* สไตล์สำหรับ Footer */
       .footer {
         margin-top: 2em;
         color: var(--text-muted);
@@ -156,7 +150,6 @@
     
     <div class="container">
       <h2>ตรวจสอบสิทธิ์ลงทะเบียน<br>เบี้ยยังชีพผู้สูงอายุ</h2>
-      <!-- ตัด by Pari Pin ออกจากตรงนี้ -->
       <p class="note">* เป็นการตรวจสอบอายุเท่านั้น</p>
       
       <h3>กรุณาเลือกวันเดือนปีเกิดของคุณ</h3>
@@ -171,13 +164,12 @@
       <div id="output" class="result" style="display:none;"></div>
     </div>
 
-    <!-- ย้าย By Pari Pin มาไว้ด้านล่างเป็น Footer -->
     <div class="footer">
       Powered by <strong>Pari Pin</strong>
     </div>
 
     <script>
-      // แสดงวันที่เป็นภาษาไทย
+      // --- ส่วนของการจัดการ UI และเหตุการณ์ ---
       document.getElementById("birthDate").addEventListener("change", function () {
         const inputDate = new Date(this.value);
         if (!isNaN(inputDate)) {
@@ -193,19 +185,18 @@
         }
       });
 
-      // ฟังก์ชันส่งตรวจสอบ
       function check() {
         const date = document.getElementById("birthDate").value;
         if (!date) {
-          alert("กรุณาเลือกวันเกิดก่อนครับ");
+          alert("กรุณาเลือกวันเกิดก่อน");
           return;
         }
 
-        // หากเรียกใช้งานผ่าน Google Apps Script
-        google.script.run.withSuccessHandler(showResult).checkPension(date);
+        // แทนที่จะเรียก google.script.run ให้เรียกฟังก์ชันในหน้านี้โดยตรง
+        const response = calculatePension(date);
+        showResult(response);
       }
 
-      // ฟังก์ชันแสดงผลลัพธ์
       function showResult(response) {
         const output = document.getElementById("output");
         output.style.display = "block";
@@ -226,6 +217,73 @@
           ยังไม่สามารถลงทะเบียนได้<br>
           สามารถลงทะเบียนได้ตั้งแต่ <strong>${response.eligibleDate}</strong> เป็นต้นไป`;
         }
+      }
+
+      // --- ส่วนของการคำนวณ (ย้ายมาจาก code.gs) ---
+      function calculatePension(birthDateString) {
+        const birthDate = new Date(birthDateString);
+        if (isNaN(birthDate)) {
+          return { status: "error", message: "วันเดือนปีเกิดไม่ถูกต้อง" };
+        }
+
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        // 2 กันยายนของปีนี้ (เป็นเส้นตัดสิทธิ์)
+        const cutoffDate = new Date(currentYear, 8, 2); 
+        
+        // หากเกิดก่อน 2 ก.ย. ของปีนี้
+        if (birthDate < new Date(cutoffDate.setFullYear(currentYear - 59))) {
+          const age = getAgeOnDate(birthDate, now);
+          return {
+            status: "eligible",
+            age: age,
+            allowance: getAllowance(age),
+            fiscalYear: currentYear + 543 
+          };
+        } else {  
+          const eligibleYear = birthDate.getFullYear() + 59;
+          let eligibleDate = new Date(eligibleYear, 9, 1);
+          if (birthDate.getMonth() < 8 || (birthDate.getMonth() === 8 && birthDate.getDate() < 2)) {
+            eligibleDate = new Date(eligibleYear - 1, 9, 1);
+          }
+          const fiscalYear = eligibleYear + 544;
+
+          return {
+            status: "not_yet",
+            age: getAgeOnDate(birthDate, now),
+            eligibleDate: formatThaiDate(eligibleDate),
+            fiscalYear: fiscalYear
+          };
+        }
+      }
+
+      function getAgeOnDate(birthDate, refDate) {
+        let age = refDate.getFullYear() - birthDate.getFullYear();
+        if (
+          refDate.getMonth() < birthDate.getMonth() ||
+          (refDate.getMonth() === birthDate.getMonth() && refDate.getDate() < birthDate.getDate())
+        ) {
+          age--;
+        }
+        return age;
+      }
+
+      function getAllowance(age) {
+        if (age >= 90) return 1000;
+        if (age >= 80) return 800;
+        if (age >= 70) return 700;
+        return 600;
+      }
+
+      function formatThaiDate(date) {
+        const monthsThai = [
+          "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+          "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
+        const day = date.getDate();
+        const month = monthsThai[date.getMonth()];
+        const year = date.getFullYear() + 543;
+        return `${day} ${month} ${year}`;
       }
     </script>
   </body>
