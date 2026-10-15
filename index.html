@@ -219,39 +219,38 @@
       }
 
       // --- ส่วนของการคำนวณ (ย้ายมาจาก code.gs) ---
-      function calculatePension(birthDateString) {
+        function calculatePension(birthDateString) {
         const birthDate = new Date(birthDateString);
         if (isNaN(birthDate)) {
           return { status: "error", message: "วันเดือนปีเกิดไม่ถูกต้อง" };
         }
 
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        // 2 กันยายนของปีนี้ (เป็นเส้นตัดสิทธิ์)
-        const cutoffDate = new Date(currentYear, 8, 2); 
+        const now = new Date(); // วันที่ปัจจุบัน
         
-        // หากเกิดก่อน 2 ก.ย. ของปีนี้
-        if (birthDate < new Date(cutoffDate.setFullYear(currentYear - 59))) {
-          const age = getAgeOnDate(birthDate, now);
+        // คำนวณปีที่อายุครบ 59 ปี
+        const eligibleYear = birthDate.getFullYear() + 59;
+        // กำหนดวันเริ่มต้นลงทะเบียนพื้นฐานคือ 1 ตุลาคม ของปีที่อายุ 59
+        let eligibleDate = new Date(eligibleYear, 9, 1); 
+        
+        // หากเกิดก่อน 2 ก.ย. จะสามารถลงทะเบียนได้เร็วขึ้น 1 ปี (ปีงบประมาณก่อนหน้า)
+        if (birthDate.getMonth() < 8 || (birthDate.getMonth() === 8 && birthDate.getDate() < 2)) {
+          eligibleDate = new Date(eligibleYear - 1, 9, 1);
+        }
+
+        const age = getAgeOnDate(birthDate, now);
+
+        // ตรวจสอบว่าวันที่ปัจจุบัน ถึงหรือเลยวันที่สามารถลงทะเบียนได้แล้วหรือยัง
+        if (now >= eligibleDate) {
           return {
             status: "eligible",
             age: age,
-            allowance: getAllowance(age),
-            fiscalYear: currentYear + 543 
+            allowance: getAllowance(age)
           };
-        } else {  
-          const eligibleYear = birthDate.getFullYear() + 59;
-          let eligibleDate = new Date(eligibleYear, 9, 1);
-          if (birthDate.getMonth() < 8 || (birthDate.getMonth() === 8 && birthDate.getDate() < 2)) {
-            eligibleDate = new Date(eligibleYear - 1, 9, 1);
-          }
-          const fiscalYear = eligibleYear + 544;
-
+        } else {
           return {
             status: "not_yet",
-            age: getAgeOnDate(birthDate, now),
-            eligibleDate: formatThaiDate(eligibleDate),
-            fiscalYear: fiscalYear
+            age: age,
+            eligibleDate: formatThaiDate(eligibleDate)
           };
         }
       }
