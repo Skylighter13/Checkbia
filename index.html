@@ -144,18 +144,37 @@
         font-size: 0.9rem;
         text-align: center;
       }
-      .contact-section {
+     .contact-section {
         margin-top: 2em;
         padding-top: 1.5em;
         border-top: 1px dashed #ce93d8;
         text-align: center;
       }
 
-      .contact-section p {
+      .contact-title {
+        font-size: 1rem;
+        color: var(--primary-color);
+        margin-bottom: 0.8em;
+      }
+
+      .contact-list {
+        display: inline-block;
+        text-align: left;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        margin-bottom: 1em;
+        line-height: 1.6;
+        padding-left: 1.5em;
+      }
+
+      .contact-list li {
+        margin-bottom: 0.3em;
+      }
+
+      .contact-footer {
         font-size: 0.95rem;
         color: var(--text-dark);
-        margin-bottom: 0.8em;
-        line-height: 1.5;
+        margin-bottom: 1em;
       }
     </style>
   </head>
@@ -177,7 +196,16 @@
       <div id="output" class="result" style="display:none;"></div>
       <!-- ส่วนปุ่มเพิ่มเพื่อน LINE -->
       <div class="contact-section">
-        <p>สอบถามข้อมูลเบี้ยยังชีพอื่นๆ เพิ่มเติม<br><strong>กองสวัสดิการสังคม เทศบาลนครสุราษฎร์ธานี</strong></p>
+        <p class="contact-title"><strong>สอบถามข้อมูลเพิ่มเติม:</strong></p>
+        <ul class="contact-list">
+          <li>เบี้ยยังชีพผู้สูงอายุ</li>
+          <li>เบี้ยยังชีพความพิการ</li>
+          <li>เบี้ยยังชีพผู้ป่วยเอดส์</li>
+          <li>เงินอุดหนุนเด็กแรกเกิด</li>
+          <li>ข้อมูลชุมชนในเขตเทศบาลฯ</li>
+          <li>ศูนย์พัฒนาคุณภาพชีวิตและส่งเสริมอาชีพผู้สูงอายุ</li>
+        </ul>
+        <p class="contact-footer">เพิ่มเพื่อนกับ<strong>กองสวัสดิการสังคม เทศบาลนครสุราษฎร์ธานี</strong></p>
         <a href="https://lin.ee/tMZ62XI" target="_blank" rel="noopener noreferrer">
           <img src="https://scdn.line-apps.com/n/line_add_friends/btn/th.png" alt="เพิ่มเพื่อน" height="36" border="0">
         </a>
